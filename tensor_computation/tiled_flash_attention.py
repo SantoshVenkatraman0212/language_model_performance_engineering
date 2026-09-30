@@ -9,7 +9,7 @@ import math
 import torch
 from config.settings import DEVICE
 
-def tiled_flash_attention(Q: torch.tensor, K: torch.tensor, V: torch.tensor, qkv_block_size: int) -> torch.tensor:
+def tiled_flash_attention_comp(Q: torch.tensor, K: torch.tensor, V: torch.tensor, qkv_block_size: int) -> torch.tensor:
     '''
     This function depicts tiled flash attention that directly addresses the seq_len ^ 2
     computational complexity by tiling Q, K and V and having only tiled dot product, and
@@ -83,12 +83,13 @@ def tiled_flash_attention(Q: torch.tensor, K: torch.tensor, V: torch.tensor, qkv
     # Final attention output tensor
     # (seq_len, d_k)
     attn_output_tensor = attn_output_tensor.reshape(n_blocks * qkv_block_size, d_k)
+    attn_output_tensor = attn_output_tensor.to(DEVICE)
 
     return attn_output_tensor
 
 def main() -> None:
     '''
-    Orcehstrator function that calls the tiled flash attention function
+    Orchestrator function that calls the tiled flash attention function
     '''
     # Query, Key and Value tensor definition
     Q = torch.tensor([[1, 0], [0, 1], [1, 1], [2, 1]], dtype = torch.float16)
@@ -96,7 +97,7 @@ def main() -> None:
     V = torch.tensor([[10, 0], [0, 20], [30, 30], [40, 40]], dtype = torch.float16)
     qk_block_size = 2
 
-    print(f'Tiled flash attention output: {tiled_flash_attention(Q, K, V, qk_block_size)}')
+    print(f'Tiled flash attention output: {tiled_flash_attention_comp(Q, K, V, qk_block_size)}')
 
 
 if __name__ == '__main__':
