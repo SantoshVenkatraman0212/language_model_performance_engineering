@@ -39,7 +39,7 @@ def tiled_flash_attention_comp(Q: torch.tensor, K: torch.tensor, V: torch.tensor
     # Now each tensor will have n_blocks tiles each of shape (qkv_block_size, d_k)
     Q, K, V = Q.reshape(n_blocks, qkv_block_size, d_k), K.reshape(n_blocks, qkv_block_size, d_k), V.reshape(n_blocks, qkv_block_size, d_k)
     # Initializing tiled attention output tensor with 0s and is of shape (n_blocks, qkv_block_size, d_k)
-    attn_output_tensor = torch.zeros((n_blocks, qkv_block_size, d_k))
+    attn_output_tensor = torch.zeros((n_blocks, qkv_block_size, d_k), dtype = Q.dtype)
     # In attention operation each query token is mutiplied with every key token, and their result with value token
     for i, q_block in enumerate(Q):
         # Online Softmax computation
