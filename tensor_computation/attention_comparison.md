@@ -1,0 +1,4 @@
+# Naive Attention VS Tiled Flash Attention (Numeric Precision, Execution time & peak VRAM allocation)
+**This report specifically focuses on time complexity, and peak VRAM allocation for naive and tiled flash attention**
+
+From the results it is very clear that the numeric precision, and the difference between naive and tiled flash attention implementation are well within the PyTorch's acceptable range. The peak VRAM allocation for attention scales up with increase in the sequence length, and flash attention is extremely memory efficient i.e. for the max sequence length of 8192, tiled flash attention uses only 10MB of VRAM at max, while naive attention requires 393MB of VRAM. However, the execution time for tiled flash attention is very high, for instance, for 8192 max sequence length flash attention takes 9.871s while naive attention takes 0.0155s. This is mainly due to the fact that CUDA's optimized fused kernels aren't being used.
