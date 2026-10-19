@@ -33,9 +33,9 @@ def main():
     '''
     # 1. Precision (FP32 VS FP16)
     # FP-16
-    Q1 = torch.tensor([[1, 0], [0, 1], [1, 1], [2, 1]], dtype = torch.float32)
-    K1 = torch.tensor([[1, 0], [0, 1], [1, 1], [2, 1]], dtype = torch.float32)
-    V1 = torch.tensor([[10, 0], [0, 20], [30, 30], [40, 40]], dtype = torch.float32)
+    Q1 = torch.tensor([[1, 0], [0, 1], [1, 1], [2, 1]], dtype = torch.float32, device = DEVICE)
+    K1 = torch.tensor([[1, 0], [0, 1], [1, 1], [2, 1]], dtype = torch.float32, device = DEVICE)
+    V1 = torch.tensor([[10, 0], [0, 20], [30, 30], [40, 40]], dtype = torch.float32, device = DEVICE)
     print('---------- 1. Precision (FP32 VS FP16) ----------')
     print('----- FP32 -----')
     # Warming up the GPU (CUDA kernel initialization itself will consume lots of time)
@@ -105,9 +105,16 @@ def main():
     # Setting seed for reproducibility
     torch.random.manual_seed(42)
     for i, s in enumerate(seq_len):
-        Q = torch.randn((s, 32), dtype = torch.float16)
-        K = torch.randn((s, 32), dtype = torch.float16)
-        V = torch.randn((s, 32), dtype = torch.float16)
+
+        Q = torch.randn((s, 32), dtype = torch.float16, device = DEVICE)
+        K = torch.randn((s, 32), dtype = torch.float16, device = DEVICE)
+        V = torch.randn((s, 32), dtype = torch.float16, device = DEVICE)
+
+        # Another 10 warmup iterations for sequence length attention scaling
+        for j in range(10):
+            print(f'Warmup phase - {j + 1}')
+            naive_attention_comp(Q, K, V)
+            tiled_flash_attention_comp(Q, K, V, 32)
         
         # Naive attention
         torch.cuda.synchronize()
